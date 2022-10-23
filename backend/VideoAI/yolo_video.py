@@ -1,10 +1,13 @@
 # import the necessary packages
+import sys
 import numpy as np
 import imutils
 import time
 from scipy import spatial
 import cv2
 from input_retrieval import *
+from azure.storage.blob import BlobClient
+
 
 
 	
@@ -18,6 +21,7 @@ from input_retrieval import *
 
 
 
+Connection_String = "DefaultEndpointsProtocol=https;AccountName=choppercharlie;AccountKey=Bcrvc/ix8TmB/hoEE2fmp44iHAqEWeiZ1fr7Fml9Z0+Q7RI8NvX2kbqzeufPKHRY54hk+wFgE/+a+AStzl2qTw==;EndpointSuffix=core.windows.net"
 
 
 # Setting the threshold for the number of frames to search a vehicle for
@@ -26,8 +30,9 @@ inputWidth, inputHeight = 416, 416
 
 #Parse command line arguments and extract the values required
 LABELS, weightsPath, configPath, inputVideoPath, outputVideoPath,\
-	preDefinedConfidence, preDefinedThreshold, list_of_vehicles, yn, a, USE_GPU= parseCommandLineArguments()
+	preDefinedConfidence, preDefinedThreshold, list_of_vehicles, yn, a, tc, ct, USE_GPU= parseCommandLineArguments()
 
+	 
 # Initialize a list of colors to represent each possible class label
 np.random.seed(42)
 COLORS = np.random.randint(0, 255, size=(len(LABELS), 3),
@@ -49,6 +54,10 @@ def displayVehicleCount(frame, vehicle_count):
 
 			)
 		print("vehicles counted:"+ str(vehicle_count))
+		file = open("../count.txt", "w")
+		file.write(str(vehicle_count))
+		file.close
+		return
 
 # PURPOSE: Determining if the box-mid point cross the line or are within the range of 5 units
 # from the line
@@ -70,7 +79,7 @@ def boxAndLineOverlap(x_mid_point, y_mid_point, line_coordinates):
 def displayFPS(start_time, num_frames):
 	current_time = int(time.time())
 	if(current_time > start_time):
-		os.system('clear') # Equivalent of CTRL+L on the terminal
+		#os.system('clear') # Equivalent of CTRL+L on the terminal
 		print("FPS:", num_frames)
 		num_frames = 0
 		start_time = current_time
@@ -183,9 +192,9 @@ print("[INFO] loading YOLO from disk...")
 net = cv2.dnn.readNetFromDarknet(configPath, weightsPath)
 
 #Using GPU if flag is passed
-if USE_GPU:
-	net.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
-	net.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA)
+# if USE_GPU:
+# 	net.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
+# 	net.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA)
 
 # ln = net.getLayerNames()
 # ln = [ln[i[0] - 1] for i in net.getUnconnectedOutLayers()]
@@ -299,14 +308,19 @@ while True:
 
 	# write the output frame to disk
 	writer.write(frame)
+	path = os.path.abspath(os.getcwd())
 
-	cv2.imshow('Frame', frame)
-	if (inputVideoPath.endswith(".mp4")):
-		if cv2.waitKey(1) & 0xFF == ord('q'):
-			break	
-	else:
-		if cv2.waitKey(0) & 0xFF == ord('q'):
-			break	
+	
+        
+		
+
+	# cv2.imshow('Frame', frame)
+	# if (inputVideoPath.endswith(".mp4")):
+	# 	if cv2.waitKey(1) & 0xFF == ord('q'):
+	# 		break	
+	# else:
+	# 	if cv2.waitKey(0) & 0xFF == ord('q'):
+	# 		break	
 
 	
 	# Updating with the current frame detections
@@ -318,4 +332,5 @@ while True:
 print("[INFO] cleaning up...")
 writer.release()
 videoStream.release()
-os.remove(inputVideoPath)
+
+
