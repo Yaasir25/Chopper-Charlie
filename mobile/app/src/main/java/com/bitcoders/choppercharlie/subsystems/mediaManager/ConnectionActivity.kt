@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.Observer
@@ -25,7 +26,6 @@ class ConnectionActivity : AppCompatActivity() {
     private lateinit var mVersionTv: TextView
 
     private val model: ConnectionViewModel by viewModels()
-
 
     ///////////////////////////////////////////////////////////
     private lateinit var GoFly: Button
@@ -55,6 +55,7 @@ class ConnectionActivity : AppCompatActivity() {
         logout.setOnClickListener {
             startActivity(Intent(this, LoginActivity::class.java))
             FirebaseAuth.getInstance().signOut()
+            Toast.makeText(this, "Logout Successful!", Toast.LENGTH_LONG).show()
         }
 /////////////////////////////////////////////////////////////////////////////////////////
         ActivityCompat.requestPermissions(this,
